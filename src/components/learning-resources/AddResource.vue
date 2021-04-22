@@ -1,9 +1,19 @@
 <template>
+  <base-dialog v-if="inputIsValid" title="Invalid Input" @close="confirmError">
+    <p>Unfortunately, at least one input value is invalid.</p>
+    <p>
+      Please check all inputs and make sure you enter at least a few characters
+      into each input field.
+    </p>
+    <template #actions>
+      <base-button @click="confirmError">Okay</base-button>
+    </template>
+  </base-dialog>
   <base-card>
-    <form>
+    <form @submit.prevent="submitData">
       <div class="form-control">
         <label for="title">Title</label>
-        <input id="title" name="title" type="text" />
+        <input id="title" name="title" type="text" ref="titleInput" />
       </div>
       <div class="form-control">
         <label for="description">Description</label>
@@ -12,11 +22,12 @@
           name="description"
           type="text"
           rows="3"
+          ref="descInput"
         ></textarea>
       </div>
       <div class="form-control">
         <label for="link">Link</label>
-        <input id="link" name="link" type="url" />
+        <input id="link" name="link" type="url" ref="linkInput" />
       </div>
       <div>
         <base-button type="submit">Add Resource</base-button>
@@ -24,6 +35,44 @@
     </form>
   </base-card>
 </template>
+
+<script>
+import BaseButton from '../UI/BaseButton.vue';
+import BaseDialog from '../UI/BaseDialog.vue';
+export default {
+  components: { BaseDialog, BaseButton },
+  data() {
+    return {
+      inputIsValid: false,
+    };
+  },
+
+  methods: {
+    submitData() {
+      const enteredTitle = this.$refs.titleInput.value;
+      const enteredDescription = this.$refs.descInput.value;
+      const enteredUrl = this.$refs.linkInput.value;
+
+      if (
+        enteredTitle.trim() === '' ||
+        enteredDescription.trim() === '' ||
+        enteredUrl.trim() === ''
+      ) {
+        this.inputIsValid = true;
+        return;
+      }
+
+      this.addResource(enteredTitle, enteredDescription, enteredUrl);
+    },
+
+    confirmError() {
+      this.inputIsValid = false;
+    },
+  },
+
+  inject: ['addResource'],
+};
+</script>
 
 <style scoped>
 label {
